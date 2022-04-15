@@ -1,19 +1,26 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 
-const TippGroupItem = ({ item }) => (
+const ItemContext = React.createContext();
+
+const TippGroupItem = ({ item, action }) => (
   <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
     <p>{item?.id}</p>
     <p>{item?.name}</p>
     <p>{item?.color}</p>
-    <button onClick={() => { }}>Remove</button>
+    <button onClick={() => action(item)}>Remove</button>
   </div>
 )
 
-const TippGroupList = ({ items }) => (
-  <div>
-    {items?.map(i => (<TippGroupItem item={i} />))}
-  </div>
-)
+const TippGroupList = () => {
+  const {items, setItems } = useContext(ItemContext);
+  const remove = (item, items) => setItems(items.filter(i => i.id !== item.id));
+
+  return (
+    <div>
+      {items?.map((item, index) => (<TippGroupItem key={index} item={item} action={i => remove(i, items)} />))}
+    </div>
+  )
+}
 
 const TippGroupAddMember = () => {
   const [hidden, setHidden] = useState(true);
@@ -34,12 +41,15 @@ const TippGroupAddMember = () => {
   )
 }
 
-const TippGroupOverview = ({ items }) => {
+const TippGroupOverview = ({ data }) => {
+  const [items, setItems] = useState(data);
   return (
-    <div style={{ width: '250px', margin: 'auto' }}>
-      <TippGroupList items={items} />
-      <TippGroupAddMember />
-    </div>
+    <ItemContext.Provider value={{items, setItems}}>
+      <div style={{ width: '250px', margin: 'auto' }}>
+        <TippGroupList />
+        <TippGroupAddMember />
+      </div>
+    </ItemContext.Provider>
   )
 }
 
